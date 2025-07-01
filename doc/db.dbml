@@ -1,0 +1,28 @@
+Table lessons {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  title varchar(200) [not null]
+  content text [not null]
+  grade_level integer [not null, note: 'Constraint: BETWEEN 3 AND 5']
+  
+  indexes {
+    (grade_level)
+  }
+
+  Note: 'Core lesson content - chapters from which questions are generated'
+}
+
+Table questions {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  lesson_id uuid [ref: > lessons.id, not null]
+  question_type varchar(20) [not null, note: 'multiple_choice, short_answer, long_answer']
+  question_text text [not null]
+  options jsonb [note: 'For multiple choice: {"A": "option1", "B": "option2", "C": "option3", "D": "option4"}']
+  correct_answer text [note: 'Correct answer or answer key']
+
+  indexes {
+    (lesson_id)
+    (question_type)
+  }
+  
+  Note: 'Questions generated from lessons by AI or created by teachers'
+}

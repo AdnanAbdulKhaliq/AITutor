@@ -1,0 +1,4 @@
+Perhaps generate reference answers along with the questions. Pass the reference answers to the model instead of the entire lesson. (Will have to check the difference in token size)
+
+Maybe store the generated questions in the database as well, so that they can be used for future reference or to generate new questions.
+
