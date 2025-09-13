@@ -44,20 +44,18 @@ try:
     else:
         # Create lesson
         lesson = Lesson(
-            id=uuid.uuid4(),
             title="The Best Christmas Present in the World",
             content=lesson_content.strip(),
             grade_level=4,
         )
 
         db.add(lesson)
-        db.commit()
+        db.flush()  # This ensures lesson.id is available
         print(f"Added lesson: {lesson.title}")
 
         # Add questions
         for question_text, answer in qna_data.items():
             question = Question(
-                id=uuid.uuid4(),
                 lesson_id=lesson.id,
                 question_type="short_answer",
                 question_text=question_text,
