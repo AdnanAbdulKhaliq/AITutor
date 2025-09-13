@@ -52,13 +52,18 @@ def get_db() -> Generator[Session, None, None]:
 
 
 def get_lesson(
-    db: Session, lesson_id: uuid.UUID = None, title: str = None
+    db: Session, lesson_id: str = None, title: str = None
 ) -> Optional[Lesson]:
     """
     Get a single lesson by its ID or title.
     """
     if lesson_id:
-        return db.query(Lesson).filter(Lesson.id == lesson_id).first()
+        try:
+            # Convert string to UUID
+            lesson_uuid = uuid.UUID(lesson_id)
+            return db.query(Lesson).filter(Lesson.id == lesson_uuid).first()
+        except (ValueError, TypeError):
+            return None
     if title:
         return db.query(Lesson).filter(Lesson.title == title).first()
     return None
@@ -71,11 +76,16 @@ def get_lessons_by_grade(db: Session, grade_level: int) -> List[Lesson]:
     return db.query(Lesson).filter(Lesson.grade_level == grade_level).all()
 
 
-def get_questions(db: Session, lesson_id: uuid.UUID) -> List[Question]:
+def get_questions(db: Session, lesson_id: str) -> List[Question]:
     """
     Get all questions for a specific lesson.
     """
-    return db.query(Question).filter(Question.lesson_id == lesson_id).all()
+    try:
+        # Convert string to UUID
+        lesson_uuid = uuid.UUID(lesson_id)
+        return db.query(Question).filter(Question.lesson_id == lesson_uuid).all()
+    except (ValueError, TypeError):
+        return []
 
 
 def get_questions_by_type(

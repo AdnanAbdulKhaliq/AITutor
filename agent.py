@@ -15,7 +15,7 @@ import json
 # q stands for question/questions
 
 q_gen_template = """
-You are an expert tutor/ question generator. Given the following lesson text and some sample questions, generate 5 new short_answer questions that are similar to the examples provided. Ensure that their answer can be given in 30-50 words by a 4th grade level student. The level of the questions and answers should be such that a 4th grade level student living in rural India can answer it.
+You are an expert tutor/ question generator. Given the following lesson text and some sample questions, generate 5 new short_answer questions that are similar to the examples provided. Ensure that their answer can be given in 50-100 words by a 8th grade level student. The level of the questions and answers should be such that a 8th grade level student living in rural India can answer it.
 
 Give the output as a JSON object with questions as keys and answers as values.
 
@@ -83,21 +83,22 @@ def generate_q(lesson_title: str) -> QnAList:
 
 
 q_eval_template = """
-You are an expert evaluator of student answers at the 4th grade level. The students come from rural Indian villages. Keep in mind that English is not their first language. Given the questions and a student's answers, assess the quality of the answers based on the following criteria:
+You are an expert evaluator of student answers at the 8th grade level. The students come from rural Indian villages. Keep in mind that English is not their first language. Given the questions and a student's answers, assess the quality of the answers based on the following criteria:
     1. Relevance: Does the answer directly address the question?
-    2. Completeness: Is the answer sufficiently detailed for a 4th grade response (30–50 words)?
+    2. Completeness: Is the answer sufficiently detailed for a 8th grade response (50-100 words)?
     3. Clarity: Is the answer clearly written and easy to understand?
-    4. Language Level: Is the language appropriate for a 4th grade student?
+    4. Language Level: Is the language appropriate for a 8th grade student?
+    5. Grammatical Accuracy: Are there any grammatical errors?
 
 You have been provided with the sample answers to the questions as well. Evaluate the student's answers by comparing them with the sample answers.
 
-You should provide positive constructive feedback. The feedback should be encouraging and peppy. Explain what is done well, what is incorrect (if there is anything), and what can be improved. You must assess the grammar and syntax along with the correctness of the response. Give your feedback in at most 100 words.
+You should provide constructive feedback. The feedback should be encouraging and peppy. Explain what is done well, what is incorrect (if there is anything), and what can be improved. You must assess the grammar and syntax along with the correctness of the response. Give your feedback in at most 100 words.
 
 Provide your evaulation in this JSON format:
-{
-    "score": <marks out of 5>,
+{{
+    "score": <marks out of 10>,
     "feedback": "<comment explaining the score (max 100 words)>"
-}
+}}
 
 Return a JSON array (list) of such objects, one for each student answer, in the same order as the questions.
 
