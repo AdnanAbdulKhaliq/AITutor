@@ -4,12 +4,11 @@ from typing import Generator, List, Optional, Dict
 
 from sqlalchemy import create_engine, Column, String, Integer, Text, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, declarative_base, Session
-from sqlalchemy.dialects.postgresql import UUID, JSONB
 
 from config import database_url
 
-# Create the SQLAlchemy engine
-engine = create_engine(database_url)
+# Create the SQLAlchemy engine with SQLite-specific settings
+engine = create_engine(database_url, echo=False, connect_args={"check_same_thread": False})
 
 # Create a configured "Session" class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -21,7 +20,7 @@ Base = declarative_base()
 class Lesson(Base):
     __tablename__ = "lessons"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     title = Column(String(200), nullable=False)
     content = Column(Text, nullable=False)
     grade_level = Column(Integer, nullable=False)
@@ -32,11 +31,11 @@ class Lesson(Base):
 class Question(Base):
     __tablename__ = "questions"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    lesson_id = Column(UUID(as_uuid=True), ForeignKey("lessons.id"), nullable=False)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    lesson_id = Column(String(36), ForeignKey("lessons.id"), nullable=False)
     question_type = Column(String(20), nullable=False)
     question_text = Column(Text, nullable=False)
-    options = Column(JSONB)
+    options = Column(Text)  # JSON stored as text for SQLite
     correct_answer = Column(Text)
 
     lesson = relationship("Lesson", back_populates="questions")
@@ -58,12 +57,7 @@ def get_lesson(
     Get a single lesson by its ID or title.
     """
     if lesson_id:
-        try:
-            # Convert string to UUID
-            lesson_uuid = uuid.UUID(lesson_id)
-            return db.query(Lesson).filter(Lesson.id == lesson_uuid).first()
-        except (ValueError, TypeError):
-            return None
+        return db.query(Lesson).filter(Lesson.id == lesson_id).first()
     if title:
         return db.query(Lesson).filter(Lesson.title == title).first()
     return None
@@ -80,16 +74,11 @@ def get_questions(db: Session, lesson_id: str) -> List[Question]:
     """
     Get all questions for a specific lesson.
     """
-    try:
-        # Convert string to UUID
-        lesson_uuid = uuid.UUID(lesson_id)
-        return db.query(Question).filter(Question.lesson_id == lesson_uuid).all()
-    except (ValueError, TypeError):
-        return []
+    return db.query(Question).filter(Question.lesson_id == lesson_id).all()
 
 
 def get_questions_by_type(
-    db: Session, lesson_id: uuid.UUID, question_type: str
+    db: Session, lesson_id: str, question_type: str
 ) -> List[Question]:
     """
     Get questions of a specific type for a specific lesson.
